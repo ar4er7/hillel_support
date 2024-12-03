@@ -1,0 +1,18 @@
+name: Check code quality
+
+on: [push, pull_request]
+
+jobs: 
+  code-quality:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install dependencies
+        run: pip install ruff black isort
+      - name: Run formatters
+        run: python -m black --check . && isort --check .
+      - name: Run linter
+        run: python -m ruff check
