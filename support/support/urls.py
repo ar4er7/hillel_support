@@ -1,13 +1,14 @@
-from typing import Callable
-import string
 import random
+import string
 
+from django.http import HttpRequest, HttpResponse
 # from django.contrib import admin
 from django.urls import path
-from django.http import HttpResponse, HttpRequest
+
 
 def create_random_string(size: int) -> str:
     return "".join(random.choice(string.ascii_letters) for _ in range(size))
+
 
 content = """
 <!DOCTYPE html>
@@ -88,7 +89,8 @@ content = """
 </html>
 """
 
-def generate_article_idea(request: HttpRequest)-> HttpResponse:
+
+def generate_article_idea(request: HttpRequest) -> HttpResponse:
     return HttpResponse(content)
 
 
