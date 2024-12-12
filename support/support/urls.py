@@ -2,7 +2,6 @@ import random
 import string
 
 from django.http import HttpRequest, HttpResponse
-# from django.contrib import admin
 from django.urls import path
 
 
