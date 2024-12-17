@@ -16,3 +16,16 @@ pipenv lock
 pipenv sync
 ```
 
+```python
+@app.get("/fetch-market")
+async def get_current_market_state():
+url = "https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=USD&to_currency=UAH&apikey=MO31CNEF7DLKTRW1"
+
+# response: requests.Response = requests.get(url)
+async with httpx.AsyncClient() as client:
+response: httpx.Response = await client.get(url)
+
+rate: str = response.json()["Realtime Currency Exchange Rate"]["5. Exchange Rate"]
+
+return {"rate": rate}
+```
