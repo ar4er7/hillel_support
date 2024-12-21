@@ -6,12 +6,14 @@ name = "pypi"
 [packages]
 django = "==4.2.16"
 requests = ">2.0.0"
+httpx = "~=0.28.1"
+django-cors-headers = "~=4.6.0"
+
+[dev-packages]
 black = ">24.0.0"
 ruff = ">0.8.0"
 isort = ">5.13.0"
-httpx = "~=0.28.1"
-
-[dev-packages]
+django-stubs = "~=5.1.0"
 
 [requires]
 python_version = "3.12"

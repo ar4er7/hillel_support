@@ -4,6 +4,7 @@ import string
 from datetime import datetime, timedelta
 
 import requests
+import httpx
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.urls import path
 from django.views.decorators.csrf import csrf_exempt
@@ -24,8 +25,8 @@ def generate_article_idea(request: HttpRequest) -> HttpResponse:
     return JsonResponse(content)
 
 
-@csrf_exempt
-def get_current_market_state(request: HttpRequest) -> JsonResponse:
+
+async def get_current_market_state(request: HttpRequest) -> JsonResponse:
     global last_answer_time, total_price
 
     if request.method == "POST":
@@ -52,7 +53,9 @@ def get_current_market_state(request: HttpRequest) -> JsonResponse:
                     }
                 )
 
-        response: requests.Response = requests.get(url)
+        async with httpx.AsyncClient() as client:
+            response: httpx.Response = await client.get(url)
+        # response: requests.Response = requests.get(url)
         rate: str = response.json()["Realtime Currency Exchange Rate"][
             "5. Exchange Rate"
         ]
