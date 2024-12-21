@@ -3,11 +3,9 @@ import random
 import string
 from datetime import datetime, timedelta
 
-import requests
 import httpx
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.urls import path
-from django.views.decorators.csrf import csrf_exempt
 
 last_answer_time = None
 total_price = 0
@@ -23,7 +21,6 @@ def generate_article_idea(request: HttpRequest) -> HttpResponse:
         "description": create_random_string(size=20),
     }
     return JsonResponse(content)
-
 
 
 async def get_current_market_state(request: HttpRequest) -> JsonResponse:
