@@ -1,79 +1,64 @@
-# from django.shortcuts import render
-
 import json
-import random
-import string
 
-from django.http import HttpRequest, JsonResponse
+from django.shortcuts import get_object_or_404
+from rest_framework import serializers
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 from issues.models import Issue
 
 
-def get_issue(request) -> JsonResponse:
-    # issues = Issue.objects.create()
-    # issues = Issue.objects.update()
-    # issues = Issue.objects.get()
-    # issues = Issue.objects.delete()
-    issues: list[Issue] = Issue.objects.all()
+class IssueSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Issue
+        # fields = ['id', 'title', 'body', 'junior_id']
+        fields = "__all__"
+        # exclude = ['id',]
 
-    results: list[dict] = [
-        {
-            "id": issue.id,
-            "title": issue.title,
-            "body": issue.body,
-            "senior_id": issue.senior_id,
-            "junior_id": issue.junior_id,
-        }
-        for issue in issues
+
+@api_view(
+    [
+        "GET",
     ]
-    return JsonResponse(data={"results": results})
+)
+def get_issue(request) -> Response:
+    issues: list[Issue] = Issue.objects.all()
+    results: list[IssueSerializer] = [IssueSerializer(issue).data for issue in issues]
+
+    return Response(data={"results": results})
 
 
-def random_str(length=10) -> str:
-    return "".join([random.choice(string.ascii_letters) for i in range(length)])
+@api_view(
+    [
+        "GET",
+    ]
+)
+def retrieve_issue(request, issue_id: int) -> Response:
+    instance = get_object_or_404(Issue, id=issue_id)
+    # try:
+    #     instance:Issue = Issue.objects.get(id=issue_id)
+    # except Issue.DoesNotExist:
+    #     raise Http404
+
+    return Response(data=IssueSerializer(instance).data)
 
 
-def create_random_issue(request: HttpRequest) -> JsonResponse:
-    issue: Issue = Issue.objects.create(
-        title=random_str(length=20),
-        body=random_str(length=30),
-        senior_id=1,
-        junior_id=2,
-    )
+@api_view(["POST"])
+def create_issue(request) -> Response:
+    try:
+        payload: dict = json.loads(request.body)
+    except json.decoder.JSONDecodeError:
+        raise Exception("Request body is invalid")
 
-    result = {
-        "id": issue.id,
-        "title": issue.title,
-        "body": issue.body,
-        "senior_id": issue.senior_id,
-        "junior_id": issue.junior_id,
-    }
+    serializer = IssueSerializer(data=payload)
+    serializer.is_valid(raise_exception=True)
 
-    return JsonResponse(data=result)
+    issue = Issue.objects.create(**serializer.validated_data)
+    # issue = Issue.objects.create(
+    #     title = serializer.validated_data['title'],
+    #     body = serializer.validated_data['body'],
+    #     junior_id = serializer.validated_data['junior_id'],
+    #     senior_id = serializer.validated_data['senior_id'],
+    # )
 
-
-def create_issue(request: HttpRequest) -> JsonResponse:
-    if request.method == "POST":
-        data = json.loads(request.body)
-
-        title: str = data.get("title", random_str(length=10))
-        body: str = data.get("body", random_str(length=25))
-        senior_id = data.get("senior_id", 1)
-        junior_id = data.get("junior_id", 2)
-
-        issue: Issue = Issue.objects.create(
-            title=title,
-            body=body,
-            senior_id=senior_id,
-            junior_id=junior_id,
-        )
-
-        result = {
-            "id": issue.id,
-            "title": issue.title,
-            "body": issue.body,
-            "senior_id": issue.senior_id,
-            "junior_id": issue.junior_id,
-        }
-
-    return JsonResponse(data=result)
+    return Response(data=IssueSerializer(issue).data)
