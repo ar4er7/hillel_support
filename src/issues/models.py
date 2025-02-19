@@ -4,7 +4,7 @@ from users.models import User
 
 
 class Issue(models.Model):
-    title = models.CharField(max_length=100)
+    title = models.CharField(max_length=50)
     status = models.PositiveBigIntegerField()
 
     junior = models.ForeignKey(
