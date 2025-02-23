@@ -1,4 +1,5 @@
 import json
+import os
 import random
 import string
 from datetime import datetime, timedelta
@@ -9,6 +10,8 @@ from django.urls import path
 
 last_answer_time = None
 total_price = 0
+
+API_KEY = os.getenv("ALPHA_VANTAGE_API_KEY")
 
 
 def create_random_string(size: int) -> str:
@@ -36,7 +39,7 @@ async def get_current_market_state(request: HttpRequest) -> JsonResponse:
             "https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&"
             f"from_currency={source}&"
             f"to_currency={destination}&"
-            "apikey=MO31CNEF7DLKTRW1"
+            f"apikey={API_KEY}"
         )
 
         if last_answer_time:
