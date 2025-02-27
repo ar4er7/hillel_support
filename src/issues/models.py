@@ -20,6 +20,8 @@ class Issue(models.Model):
 
 
 class Message(models.Model):
+    # class Meta:
+    #     db_table = "messages"
     body: str = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
 
