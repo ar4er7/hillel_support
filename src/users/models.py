@@ -4,24 +4,17 @@ from django.utils import timezone
 
 from .managers import UserManager
 
-# class User(models.Model):
-
-#     password = models.CharField(max_length=100)
-
 
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.CharField(max_length=30, unique=True)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
-    # password field is already provided by AbstractBaseUser
-    # last_login field is already provided by AbstractBaseUser
 
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
-    # is_superuser field is already provided by PermissionsMixin
     date_joined = models.DateTimeField(default=timezone.now)
 
-    role = models.CharField(max_length=20)
+    role = models.CharField(max_length=15)
 
     objects = UserManager()
 
