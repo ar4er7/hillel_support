@@ -23,7 +23,6 @@ class UserAPI(generics.CreateAPIView):
 
     def post(self, request):
         return self.create(request)
-         
 
 
 class UserRetrieveUpdateAPI(generics.RetrieveUpdateAPIView):
