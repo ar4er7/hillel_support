@@ -12,8 +12,6 @@ class IssueSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Issue
-        # fields = ['id', 'title', 'body', 'junior_id']
-        # exclude = ['id',]
         fields = "__all__"
 
     def validate(self, attrs):

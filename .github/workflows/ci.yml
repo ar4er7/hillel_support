@@ -4,15 +4,15 @@ on: [push, pull_request]
 
 jobs: 
   code-quality:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - name: Install dependencies
-        run: pip install ruff black isort
+        run: pip install pipenv && pipenv install --dev --system
       - name: Run formatters
-        run: python -m black --check . && isort --check .
+        run: python -m black --check . && python -m isort --check .
       - name: Run linter
-        run: python -m ruff check
+        run: python -m ruff check 
