@@ -4,9 +4,9 @@ from .models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(
-        write_only=True
-    )  ## to ensure password is not returned in the response
+    # password = serializers.CharField(
+    #     write_only=True
+    # )  ## to ensure password is not returned in the response
 
     class Meta:
         model = User
@@ -23,6 +23,7 @@ class UserAPI(generics.CreateAPIView):
 
     def post(self, request):
         return self.create(request)
+         
 
 
 class UserRetrieveUpdateAPI(generics.RetrieveUpdateAPIView):
