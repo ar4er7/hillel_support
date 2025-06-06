@@ -24,7 +24,7 @@ class Issue(models.Model):
 class Message(models.Model):
     # class Meta:
     #     db_table = "messages"
-    body: str = models.TextField()
+    body = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
