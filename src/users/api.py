@@ -1,7 +1,7 @@
+from django.contrib.auth import get_user_model, hashers
 from rest_framework import generics, serializers
 
-from .models import User
-
+User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
     # password = serializers.CharField(
@@ -10,14 +10,20 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["id", "email", "first_name", "last_name", "password", "role"]
+        fields = ["id", "email", "first_name", "last_name", "role", "password"]
 
     def create(self, data):
         user = User.objects.create_user(**data)
         return user
+    
+    def update(self, instance, validated_data):
+        password = validated_data.pop('password', None) 
+        if password:
+            instance.set_password(password)
+        return super().update(instance, validated_data)
 
 
-class UserAPI(generics.CreateAPIView):
+class UserCreateAPI(generics.CreateAPIView):
     http_method_names = ["post"]
     serializer_class = UserSerializer
 
