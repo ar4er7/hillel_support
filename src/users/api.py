@@ -11,10 +11,10 @@ User = get_user_model()
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = "__all__"
+        fields = ("id", "email", "password", "first_name", "last_name", "role")
 
 
-class UserReistrationSerializer(serializers.ModelSerializer):
+class UserRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("email", "password", "first_name", "last_name", "role")
@@ -31,7 +31,7 @@ class UserReistrationSerializer(serializers.ModelSerializer):
         return attrs
 
 
-class UserRegisrtationPublicSerializer(serializers.ModelSerializer):
+class UserRegistrationPublicSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("email", "first_name", "last_name", "role")
@@ -39,8 +39,10 @@ class UserRegisrtationPublicSerializer(serializers.ModelSerializer):
 
 class UserListCreateAPI(generics.ListCreateAPIView):
     http_method_names = ["get", "post"]
-    serializer_class = UserReistrationSerializer
-    permission_classes = [permissions.AllowAny]
+    serializer_class = UserRegistrationSerializer
+    permission_classes = [
+        permissions.AllowAny,
+    ]
 
     def get_queryset(self):
         return User.objects.all()
@@ -51,45 +53,61 @@ class UserListCreateAPI(generics.ListCreateAPIView):
         self.perform_create(serializer)
 
         return Response(
-            UserRegisrtationPublicSerializer(serializer.validated_data).data,
+            UserRegistrationPublicSerializer(serializer.validated_data).data,
             status=status.HTTP_201_CREATED,
             headers=self.get_success_headers(serializer.data),
         )
 
     def get(self, request):
         queryset = self.get_queryset()
-        serializer = UserSerializer(queryset)
+        serializer = UserSerializer(queryset, many=True)
 
         return Response(
             serializer.data,
             status=status.HTTP_200_OK,
-            headers=self.get_success_headers(serializer.data),
         )
 
 
-class UserDeleteAPI(generics.DestroyAPIView):
-    http_method_names = ["delete"]
-    serializer_class = UserSerializer
-    permission_classes = [
-        permissions.IsAuthenticated,
-        permissions.IsAdminUser,
+class UserRetrieveDeleteAPI(generics.RetrieveUpdateDestroyAPIView):
+    http_method_names = [
+        "get",
+        "put",
+        "delete",
     ]
+    serializer_class = UserSerializer
     lookup_url_kwarg = "id"
 
-    def validate_role(self, value: str) -> str:
-        if value is not Role.ADMIN:
-            raise serializers.ValidationError(
-                f"Invalid role: {value} only admin can delete users"
-            )
-        return value
+    # permission_classes = [
+    #     permissions.IsAuthenticated, permissions.IsAdminUser
+    # ]
+
+    def get_permissions(self):
+        if self.request.method == "GET":
+            return [permissions.IsAuthenticated()]
+        return [permissions.IsAdminUser()]
 
     def get_queryset(self):
         return User.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = UserRegistrationPublicSerializer(instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def delete(self, request, *args, **kwargs):
         instance = self.get_object()
         self.perform_destroy(instance)
         return Response(data="user deleted", status=status.HTTP_204_NO_CONTENT)
+
+    def put(self, request, *args, **kwargs):
+        serializer = UserRegistrationPublicSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        return Response(
+            UserRegistrationPublicSerializer(serializer.validated_data).data,
+            status=status.HTTP_200_OK,
+        )
 
 
 # def create_user(request: HttpRequest) -> JsonResponse:
