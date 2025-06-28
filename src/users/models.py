@@ -10,12 +10,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.CharField(max_length=30, unique=True)
     first_name = models.CharField(max_length=50, blank=True)
     last_name = models.CharField(max_length=50, blank=True)
+    role = models.CharField(max_length=15, default=Role.JUNIOR, choices=Role.choices())
 
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     date_joined = models.DateTimeField(default=timezone.now)
-
-    role = models.CharField(max_length=15, default=Role.JUNIOR, choices=Role.choices())
 
     objects = UserManager()
 
