@@ -8,7 +8,6 @@ from users.api import UserListCreateAPI, UserRetrieveDeleteAPI
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    # Users
     path("users/", UserListCreateAPI.as_view()),
     path("users/<int:id>", UserRetrieveDeleteAPI.as_view()),
     # Issues
