@@ -7,7 +7,7 @@ from issues.api import (
     IssuesRetrieveUpdateDeleteAPI,
     issues_close,
     issues_take,
-    messages_api_dispatcher,
+    messages_api_dispatcher
 )
 from users.api import UserListCreateAPI, UserRetrieveDeleteAPI
 
