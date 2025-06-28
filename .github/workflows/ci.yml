@@ -13,6 +13,6 @@ jobs:
       - name: Install dependencies
         run: pip install pipenv && pipenv install --dev --system
       - name: Run formatters
-        run: python -m black --check .
+        run: python -m black --check . && python -m isort --check .
       - name: Run linter
         run: python -m ruff check 
