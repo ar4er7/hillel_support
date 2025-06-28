@@ -44,10 +44,6 @@ class IssueSerializer(serializers.ModelSerializer):
         model = Issue
         fields = "__all__"
 
-    # def validate(self, attrs):
-    #     attrs["status"] = Status.OPENED
-    #     return attrs
-
     def create(self, validated_data):
         validated_data["status"] = Status.OPENED
         return super().create(validated_data)
