@@ -14,10 +14,13 @@ RUN apt-get update -y \
 COPY ./Pipfile ./Pipfile.lock /
 RUN pipenv sync --dev --system
 
+# TODO investiogate why this is needed
+RUN pip install psycopg[binary]
+
 WORKDIR /app
 COPY ./ ./
 
 EXPOSE 8000
 
 ENTRYPOINT [ "python" ]
-CMD [ "src/manage.py", "runserver" ]
+CMD [ "src/manage.py", "runserver"]
