@@ -8,13 +8,21 @@ services:
         container_name: hillel_support_api
         ports:
             - "8000:8000"
-        env_file: ".env"
+        env_file: .env
         depends_on:
-            - database
+            database:
+                condition: service_healthy
+                restart: true
 
     database:
         image: "postgres:17"
         container_name: hillel_support_database
-        env_file: ".env"
+        env_file: .env
         ports:
             - "5432:5432"
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d ${POSTGRES_DB}"]
+            interval: 10s
+            retries: 5
+            start_period: 10s
+            timeout: 10s
