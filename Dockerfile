@@ -24,3 +24,4 @@ EXPOSE 8000
 
 ENTRYPOINT [ "python" ]
 CMD [ "src/manage.py", "runserver"]
+# CMD [ "src/manage.py", "runserver", "0.0.0.0:8000" ] to run the server on all interfaces
