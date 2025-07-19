@@ -3,6 +3,8 @@ from django.contrib.auth.hashers import make_password
 from rest_framework import generics, permissions, serializers, status
 from rest_framework.response import Response
 
+from mailing.tasks import send_email
+
 from .enums import Role
 
 User = get_user_model()
@@ -51,6 +53,8 @@ class UserListCreateAPI(generics.ListCreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
+
+        send_email.delay()
 
         return Response(
             UserRegistrationPublicSerializer(serializer.validated_data).data,
