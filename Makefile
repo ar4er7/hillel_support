@@ -9,3 +9,7 @@ check:
 .PHONY: format
 format:
 	python -m ruff check . --fix && python -m isort . && python -m black .
+
+.PHONY: worker
+worker:
+	celery -A config worker -l INFO
