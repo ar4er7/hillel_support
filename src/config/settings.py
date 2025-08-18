@@ -151,3 +151,10 @@ APPEND_SLASH = False
 # Celery configuration
 CELERY_BROKER_URL = os.getenv("REDIS_URL", default="redis://broker:6379/0")
 # CELERY_TASK_SERIALIZER = "pickle"
+
+
+EMAIL_BACKEND = os.getenv("EMAIL_BACKEND")
+EMAIL_HOST = os.getenv("EMAIL_HOST")
+EMAIL_PORT = os.getenv("EMAIL_PORT")
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
