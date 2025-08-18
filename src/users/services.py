@@ -4,7 +4,7 @@ from .tasks import send_activation_mail
 
 # from .constants import USER_ACTIVATION_UUID_NAMESPACE #uncomment if you want to use fixed namespace
 
-# OOP approach
+# func approach
 # def create_activation_key(email: str) -> uuid.UUID:
 #     return uuid.uuid3(namespace=uuid.uuid4(), name=email)  # for dynamic namespace
 #     # return uuid.uuid3(namespace=USER_ACTIVATION_UUID_NAMESPACE, name=email) #for fixed namespace
