@@ -1,10 +1,12 @@
+import uuid
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
 from rest_framework import generics, permissions, serializers, status
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from mailing.tasks import send_email
-
+from . import services
 from .enums import Role
 
 User = get_user_model()
@@ -54,7 +56,22 @@ class UserListCreateAPI(generics.ListCreateAPIView):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
 
-        send_email.delay()
+        # # functional approach
+        # activation_key: uuid.UUID = services.create_activation_key(
+        #     email=serializer.data["email"]
+        # )
+        # services.send_user_activation_email(
+        #     email=serializer.data["email"], activation_key=activation_key
+        # )
+
+        # OOP approach
+        activation_service = services.Activator(email=serializer.data["email"])
+        activation_key: uuid.UUID = (
+            activation_service.create_activation_key()
+        )  # create activation key
+        activation_service.send_user_activation_email(
+            activation_key=activation_key
+        )  # send activation email
 
         return Response(
             UserRegistrationPublicSerializer(serializer.validated_data).data,
@@ -70,6 +87,12 @@ class UserListCreateAPI(generics.ListCreateAPIView):
             serializer.data,
             status=status.HTTP_200_OK,
         )
+
+
+@api_view(["POST"])
+def resend_activation_mail(request):  # -> Response:
+    breakpoint()
+    pass
 
 
 class UserRetrieveDeleteAPI(generics.RetrieveUpdateDestroyAPIView):
