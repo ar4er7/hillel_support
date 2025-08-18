@@ -7,4 +7,4 @@ from config import celery_app
 def send_email():
     print("Sending email ...")
     time.sleep(3)
-    print("email sent  ...")
+    print("✅email sent  ...")

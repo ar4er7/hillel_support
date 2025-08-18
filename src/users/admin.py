@@ -14,3 +14,13 @@ class UserAdmin(admin.ModelAdmin):
         "is_superuser",
         "email",
     ]
+    list_display = (
+        "id",
+        "email",
+        "first_name",
+        "last_name",
+        "role",
+        "is_active",
+        "is_staff",
+        "is_superuser",
+    )

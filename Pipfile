@@ -12,6 +12,7 @@ djangorestframework-simplejwt = { version = "~=5.3.1", extras = ["crypto"] }
 httpx = "~=0.28.1"
 psycopg = { version = "*", extras = ["binary"] }
 requests = ">2.0.0"
+redis = {extras = ["hiredis"], version = "*"}
 
 [dev-packages]
 black = ">24.0.0"
