@@ -56,7 +56,7 @@ class UserListCreateAPI(generics.ListCreateAPIView):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
 
-        # # OOP approach
+        # # functional approach
         # activation_key: uuid.UUID = services.create_activation_key(
         #     email=serializer.data["email"]
         # )
