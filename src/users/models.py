@@ -37,3 +37,13 @@ class User(AbstractBaseUser, PermissionsMixin):
             return self.get_full_name()
         else:
             return self.email
+
+
+class ActivationKey(models.Model):
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="activation_keys"
+    )
+    key = models.TextField(unique=True)
+
+    def __str__(self):
+        return f"Activation Key for {self.user.email} - {self.key}"
