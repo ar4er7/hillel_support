@@ -1,3 +1,5 @@
 import uuid
 
-USER_ACTIVATION_UUID_NAMESPACE = uuid.UUID("8a07654d-3352-40cd-8404-cf68e2a4ce37")
+USER_ACTIVATION_UUID_NAMESPACE = uuid.uuid3(
+    namespace=uuid.NAMESPACE_DNS, name="activation"
+)

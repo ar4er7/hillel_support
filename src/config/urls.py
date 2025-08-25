@@ -9,12 +9,18 @@ from issues.api import (
     issues_take,
     messages_api_dispatcher,
 )
-from users.api import UserListCreateAPI, UserRetrieveDeleteAPI, resend_activation_mail
+from users.api import (
+    UserListCreateAPI,
+    UserRetrieveDeleteAPI,
+    activate_user,
+    resend_activation_mail,
+)
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("users/", UserListCreateAPI.as_view()),
     path("users/<int:id>", UserRetrieveDeleteAPI.as_view()),
+    path("users/activate/", activate_user),
     path("users/resendActivation", resend_activation_mail),
     # Issues
     path("issues/", IssuesAPI.as_view()),

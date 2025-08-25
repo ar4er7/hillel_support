@@ -1,8 +1,11 @@
 import uuid
 
-from .tasks import send_activation_mail
+from django.contrib.auth import get_user_model
 
-# from .constants import USER_ACTIVATION_UUID_NAMESPACE #uncomment if you want to use fixed namespace
+from .models import ActivationKey
+from .tasks import send_activation_mail, send_successful_activation_mail
+
+User = get_user_model()
 
 # func approach
 # def create_activation_key(email: str) -> uuid.UUID:
@@ -26,6 +29,7 @@ from .tasks import send_activation_mail
 class Activator:
     def __init__(self, email: str):
         self.email = email
+        self.user = User.objects.get(email=email)
 
     def create_activation_key(self) -> uuid.UUID:
         return uuid.uuid3(namespace=uuid.uuid4(), name=self.email)
@@ -42,9 +46,7 @@ class Activator:
             recipient=self.email, activation_link=activation_link
         )
 
-    def save_activation_information(
-        self, internal_user_id: int, activation_key: uuid.UUID
-    ) -> None:
+    def save_activation_information(self, activation_key: uuid.UUID) -> None:
         """Save activation information to the cache
 
         1. Connect to the cache
@@ -54,10 +56,10 @@ class Activator:
             }
         3. return None
         """
+        ActivationKey.objects.create(user=self.user, key=str(activation_key))
+
         # create redis connection instance
         # save the record in the Redis cache with TTL of 1 day
-
-        raise NotImplementedError
 
     def validate_activation(self, activation_key: uuid.UUID) -> None:
         """Validate the activation UUID in the cache.
@@ -69,8 +71,17 @@ class Activator:
         4. 200 if exists and update user.is_active to True
         """
 
+        try:
+            key = ActivationKey.objects.get(key=str(activation_key))
+        except ActivationKey.DoesNotExist:
+            raise ValueError("no such activation key in the DB")
+
+        key.user.is_active = True
+        key.user.save()
+        key.delete()
+
+        send_successful_activation_mail.delay(recipient=self.email)
+
         # create redis connection instance
         # generate the key based on the namespace
         # update the user.is_active to True
-
-        raise NotImplementedError

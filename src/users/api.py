@@ -3,11 +3,12 @@ import uuid
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
 from rest_framework import generics, permissions, serializers, status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
 from . import services
 from .enums import Role
+from .models import ActivationKey
 
 User = get_user_model()
 
@@ -41,6 +42,22 @@ class UserRegistrationPublicSerializer(serializers.ModelSerializer):
         fields = ("email", "first_name", "last_name", "role")
 
 
+class UserActivationSerializer(serializers.ModelSerializer):
+    user_email = serializers.EmailField(source="user.email", read_only=True)
+    key = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = ActivationKey
+        fields = ("key", "user_email")
+
+    def validate_key(self, value: str):
+        try:
+            uuid.UUID(value)
+        except ValueError:
+            raise serializers.ValidationError("Invalid format of the activation key")
+        return value
+
+
 class UserListCreateAPI(generics.ListCreateAPIView):
     http_method_names = ["get", "post"]
     serializer_class = UserRegistrationSerializer
@@ -66,12 +83,12 @@ class UserListCreateAPI(generics.ListCreateAPIView):
 
         # OOP approach
         activation_service = services.Activator(email=serializer.data["email"])
-        activation_key: uuid.UUID = (
-            activation_service.create_activation_key()
-        )  # create activation key
-        activation_service.send_user_activation_email(
-            activation_key=activation_key
-        )  # send activation email
+
+        activation_key: uuid.UUID = activation_service.create_activation_key()
+
+        activation_service.send_user_activation_email(activation_key=activation_key)
+
+        activation_service.save_activation_information(activation_key)
 
         return Response(
             UserRegistrationPublicSerializer(serializer.validated_data).data,
@@ -93,6 +110,51 @@ class UserListCreateAPI(generics.ListCreateAPIView):
 def resend_activation_mail(request):  # -> Response:
     breakpoint()
     pass
+
+
+@api_view(["POST"])
+@permission_classes([permissions.AllowAny])
+def activate_user(request) -> Response:
+    serializer = UserActivationSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+
+    raw_key = request.data.get("key")  # get the key from the request body
+    if not raw_key:
+        return Response(
+            {"activation key is required"}, status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        parsed_key = uuid.UUID(raw_key)  # try cast parsed key to UUID
+    except ValueError:
+        return Response(
+            {"invalid format of the activation key"}, status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        activation_key = ActivationKey.objects.get(
+            key=str(raw_key)
+        )  # try to get the activation key from the DB
+    except ActivationKey.DoesNotExist:
+        return Response(
+            {"no such activation key in the DB"}, status=status.HTTP_404_NOT_FOUND
+        )
+
+    email: str = (
+        activation_key.user.email
+    )  # get the email from the user associated with the activation key
+    activation_service = services.Activator(
+        email=email
+    )  # create an instance of the Activator service class
+
+    try:
+        activation_service.validate_activation(activation_key=parsed_key)
+    except ValueError:
+        return Response({"wrong_activation_key"}, status=status.HTTP_404_NOT_FOUND)
+
+    return Response(
+        {"message": "User activated successfully"}, status=status.HTTP_200_OK
+    )
 
 
 class UserRetrieveDeleteAPI(generics.RetrieveUpdateDestroyAPIView):
