@@ -242,6 +242,7 @@ fabric.properties
 .vscode/
 .ruff_cache/
 .idea/
+examples/
 
 #Vim swap files
 *.swp 
