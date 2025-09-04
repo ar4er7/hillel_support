@@ -54,7 +54,9 @@ class UserActivationSerializer(serializers.ModelSerializer):
         try:
             uuid.UUID(value)
         except ValueError:
-            raise serializers.ValidationError("Invalid format of the activation key")
+            raise serializers.ValidationError(
+                "Invalid format of the activation key from the serializer"
+            )
         return value
 
 
@@ -118,37 +120,29 @@ def activate_user(request) -> Response:
     serializer = UserActivationSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
 
-    raw_key = request.data.get("key")  # get the key from the request body
-    if not raw_key:
-        return Response(
-            {"activation key is required"}, status=status.HTTP_400_BAD_REQUEST
-        )
+    """assuring Pylance that "is_valid" is a dict and has keys and values"""
+    if not isinstance(serializer.validated_data, dict):
+        raise TypeError("validated_data is not a dict")
 
-    try:
-        parsed_key = uuid.UUID(raw_key)  # try cast parsed key to UUID
-    except ValueError:
-        return Response(
-            {"invalid format of the activation key"}, status=status.HTTP_400_BAD_REQUEST
-        )
+    raw_key = serializer.validated_data["key"]
 
     try:
         activation_key = ActivationKey.objects.get(
-            key=str(raw_key)
+            key=raw_key
         )  # try to get the activation key from the DB
     except ActivationKey.DoesNotExist:
         return Response(
             {"no such activation key in the DB"}, status=status.HTTP_404_NOT_FOUND
         )
 
-    email: str = (
-        activation_key.user.email
-    )  # get the email from the user associated with the activation key
-    activation_service = services.Activator(
-        email=email
-    )  # create an instance of the Activator service class
+    email: str = activation_key.user.email
+    # get the email from the user associated with the activation key
+
+    activation_service = services.Activator(email=email)
+    # create an instance of the Activator service class
 
     try:
-        activation_service.validate_activation(activation_key=parsed_key)
+        activation_service.validate_activation(activation_key=uuid.UUID(raw_key))
     except ValueError:
         return Response({"wrong_activation_key"}, status=status.HTTP_404_NOT_FOUND)
 
