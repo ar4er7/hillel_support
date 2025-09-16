@@ -44,20 +44,20 @@ class UserRegistrationPublicSerializer(serializers.ModelSerializer):
 
 class UserActivationSerializer(serializers.ModelSerializer):
     user_email = serializers.EmailField(source="user.email", read_only=True)
-    key = serializers.CharField(write_only=True)
+    key = serializers.UUIDField(write_only=True)
 
     class Meta:
         model = ActivationKey
         fields = ("key", "user_email")
 
-    def validate_key(self, value: str):
-        try:
-            uuid.UUID(value)
-        except ValueError:
-            raise serializers.ValidationError(
-                "Invalid format of the activation key from the serializer"
-            )
-        return value
+    # def validate_key(self, value: str):
+    #     try:
+    #         uuid.UUID(value)
+    #     except ValueError:
+    #         raise serializers.ValidationError(
+    #             "Invalid format of the activation key from the serializer"
+    #         )
+    #     return value
 
 
 class UserListCreateAPI(generics.ListCreateAPIView):
@@ -142,7 +142,7 @@ def activate_user(request) -> Response:
     # create an instance of the Activator service class
 
     try:
-        activation_service.validate_activation(activation_key=uuid.UUID(raw_key))
+        activation_service.validate_activation(activation_key=(raw_key))
     except ValueError:
         return Response({"wrong_activation_key"}, status=status.HTTP_404_NOT_FOUND)
 
