@@ -3,28 +3,23 @@ services:
   broker:
     image: "redis:latest"
     container_name: hillel_support_broker
-    ports:
-      - "6379:6379"
+
   cache:
     image: "redis:latest"
     container_name: hillel_support_cache
-    ports:
-      - "6380:6379"
+
 
   mailing:
     image: "mailhog/mailhog:latest"
     container_name: hillel_support_mailing
     env_file: .env
     ports:
-      - "1025:1025"
       - "8025:8025"
       
   database:
     image: "postgres:17"
     container_name: hillel_support_database
     env_file: .env
-    ports:
-      - "5433:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d ${POSTGRES_DB}"]
       interval: 10s

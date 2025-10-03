@@ -1,11 +1,12 @@
 from django.db import models
 
+from shared.django import TimestampMixin
 from users.models import User
 
 from .enums import Status
 
 
-class Issue(models.Model):
+class Issue(TimestampMixin):
     title = models.CharField(max_length=50)
     body = models.TextField(null=True)
     status = models.PositiveBigIntegerField(

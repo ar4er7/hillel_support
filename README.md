@@ -20,3 +20,20 @@ pipenv sync
 
 
 ```
+
+# 🐳 Deploy with Docker Compose 
+
+```sh
+cp .env.default .env
+docker compose build && docker compose up -d
+```
+
+### some useful commands
+
+```sh
+# getting last 20 lines of a container's log and follow the stdout flow 
+docker compose logs --tail 20 -f <container name>
+
+#execute a command inside the container
+docker compose exec <container name> <command>
+```

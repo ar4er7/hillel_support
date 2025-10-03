@@ -50,15 +50,6 @@ class UserActivationSerializer(serializers.ModelSerializer):
         model = ActivationKey
         fields = ("key", "user_email")
 
-    # def validate_key(self, value: str):
-    #     try:
-    #         uuid.UUID(value)
-    #     except ValueError:
-    #         raise serializers.ValidationError(
-    #             "Invalid format of the activation key from the serializer"
-    #         )
-    #     return value
-
 
 class UserListCreateAPI(generics.ListCreateAPIView):
     http_method_names = ["get", "post"]
@@ -85,12 +76,14 @@ class UserListCreateAPI(generics.ListCreateAPIView):
 
         # OOP approach
         activation_service = services.Activator(email=serializer.data["email"])
-
         activation_key: uuid.UUID = activation_service.create_activation_key()
 
-        activation_service.send_user_activation_email(activation_key=activation_key)
+        activation_service.save_activation_information(
+            internal_user_id=serializer.instance.id,
+            activation_key=activation_key,
+        )
 
-        activation_service.save_activation_information(activation_key)
+        activation_service.send_user_activation_email(activation_key=activation_key)
 
         return Response(
             UserRegistrationPublicSerializer(serializer.validated_data).data,
@@ -124,25 +117,26 @@ def activate_user(request) -> Response:
     if not isinstance(serializer.validated_data, dict):
         raise TypeError("validated_data is not a dict")
 
-    raw_key = serializer.validated_data["key"]
+    recieved_key = serializer.validated_data["key"]
+
+    # try:
+    #     activation_key = ActivationKey.objects.get(
+    #         key=recieved_key
+    #     )  # try to get the activation key from the DB
+    # except ActivationKey.DoesNotExist:
+    #     return Response(
+    #         {"no such activation key in the DB"}, status=status.HTTP_404_NOT_FOUND
+    #     )
+
+    # email: str = activation_key.user.email
+    # # get the email from the user associated with the activation key
+
+    # activation_service = services.Activator(email=email)
+    # # create an instance of the Activator service class
 
     try:
-        activation_key = ActivationKey.objects.get(
-            key=raw_key
-        )  # try to get the activation key from the DB
-    except ActivationKey.DoesNotExist:
-        return Response(
-            {"no such activation key in the DB"}, status=status.HTTP_404_NOT_FOUND
-        )
-
-    email: str = activation_key.user.email
-    # get the email from the user associated with the activation key
-
-    activation_service = services.Activator(email=email)
-    # create an instance of the Activator service class
-
-    try:
-        activation_service.validate_activation(activation_key=(raw_key))
+        # activation_service.validate_activation_SQL(activation_key=(recieved_key))
+        services.Activator.validate_activation_redis(activation_key=(recieved_key))
     except ValueError:
         return Response({"wrong_activation_key"}, status=status.HTTP_404_NOT_FOUND)
 
@@ -159,10 +153,6 @@ class UserRetrieveDeleteAPI(generics.RetrieveUpdateDestroyAPIView):
     ]
     serializer_class = UserSerializer
     lookup_url_kwarg = "id"
-
-    # permission_classes = [
-    #     permissions.IsAuthenticated, permissions.IsAdminUser
-    # ]
 
     def get_permissions(self):
         if self.request.method == "GET":
