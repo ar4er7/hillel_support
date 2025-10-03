@@ -1,0 +1,10 @@
+from django.db import models
+
+
+class TimestampMixin(models.Model):
+    """Mixin to add a timestamp field to models."""
+
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        abstract = True

@@ -2,6 +2,8 @@ import uuid
 
 from django.contrib.auth import get_user_model
 
+from shared.cache import CacheService
+
 from .models import ActivationKey
 from .tasks import send_activation_mail, send_successful_activation_mail
 
@@ -46,22 +48,17 @@ class Activator:
             recipient=self.email, activation_link=activation_link
         )
 
-    def save_activation_information(self, activation_key: uuid.UUID) -> None:
-        """Save activation information to the cache
+    def save_activation_information(
+        self, internal_user_id: int, activation_key: uuid.UUID
+    ) -> None:
+        # ActivationKey.objects.create(user=self.user, key=str(activation_key))
+        cache = CacheService()
+        payload = {"user_id": internal_user_id}
+        cache.save(
+            namespace="activation", key=activation_key, instance=payload, ttl=2000
+        )
 
-        1. Connect to the cache
-        2. Save the next structure to the cache:
-            {
-                "activation:fd531655-f638-456b-aabe-1c77482f379e": {"user_id":3}
-            }
-        3. return None
-        """
-        ActivationKey.objects.create(user=self.user, key=str(activation_key))
-
-        # create redis connection instance
-        # save the record in the Redis cache with TTL of 1 day
-
-    def validate_activation(self, activation_key: uuid.UUID) -> None:
+    def validate_activation_SQL(self, activation_key: uuid.UUID) -> None:
         """Validate the activation UUID in the cache.
 
         1. Buidl the key in the activation namespace:
@@ -85,3 +82,22 @@ class Activator:
         # create redis connection instance
         # generate the key based on the namespace
         # update the user.is_active to True
+
+    @staticmethod
+    def validate_activation_redis(activation_key: uuid.UUID):
+        # connection = redis.Redis.from_url(settings.CACHE_URL, decode_responses=True)
+        cache = CacheService()
+        payload = cache.get(namespace="activation", key=activation_key)
+        if not payload:
+            raise ValueError("no such activation key in the cache")
+
+        user_id = payload.get("user_id")
+        cache.connection.delete(f"activation:{activation_key}")
+
+        user = User.objects.get(id=user_id)
+        if user.is_active:
+            raise ValueError("user is already active")
+
+        user.is_active = True
+        user.save()
+        send_successful_activation_mail.delay(recipient=user.email)  # type: ignore
