@@ -1,0 +1,41 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - homework
+      - main
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - main 
+
+jobs: 
+  code-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install pipenv && pipenv install --dev --system
+      - name: Run formatters
+        run: python -m black --check . && python -m isort --check .
+      - name: Run linter
+        run: python -m ruff check
+
+  deploy-to-production:
+    needs: code-quality
+    runs-on: ubuntu-latest
+    if: startsWith(github.event.ref, 'refs/tags/v')
+    steps:
+      - name: Execute remote SSH  commands using KEY
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.HOST }}
+          username: linuxserver.io
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          script: ip addr
