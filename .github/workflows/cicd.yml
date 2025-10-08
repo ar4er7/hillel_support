@@ -37,4 +37,4 @@ jobs:
           username: linuxserver.io
           password: ${{ secrets.PASSWORD }}
           port: ${{ secrets.PORT }}
-          script: whoami
+          script: ip addr
