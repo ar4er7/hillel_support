@@ -36,10 +36,11 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           port: ${{ secrets.SERVER_PORT }}
           username: ${{ secrets.SERVER_USERNAME }}
-          key: ${{ secrets.SERVER_SSH__PRIVATE_KEY }}
+          key: ${{ secrets.SERVER_SSH_PRIVATE_KEY }}
           script: 
             cd ~/hillel_support
             git pull
             docker compose down
             docker compose up -d
             docker compose exec api python3 src/manage.py migrate
+            echo "🚀 deployment succesfull"
