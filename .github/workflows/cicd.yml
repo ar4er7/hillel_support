@@ -35,7 +35,7 @@ jobs:
           port: ${{ secrets.SERVER_PORT }}
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_SSH_PRIVATE_KEY }}
-          script: 
+          script: | 
             cd ~/hillel_support
             git pull
             docker compose down
