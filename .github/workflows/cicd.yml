@@ -44,4 +44,4 @@ jobs:
             docker compose down
             docker compose up -d
             docker compose exec api python3 src/manage.py migrate
-            echo "🚀 deployment succesfull"
+            echo "🚀deployment succesfull"
