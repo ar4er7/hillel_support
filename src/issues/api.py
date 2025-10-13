@@ -1,4 +1,5 @@
 from django.db.models import Q
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, permissions, serializers, status
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import PermissionDenied
@@ -57,11 +58,15 @@ class IssuesAPI(generics.ListCreateAPIView):
         return Issue.objects.all()
 
     def post(self, request):
+        """Create an issue. You must be authorized via Role.JUNIOR to create an issue.
+        The issue will be set to OPENED and automatically assigned to the junior creating it.
+        """
         if request.user.role != Role.JUNIOR:
             raise Exception("only juniors can create issues")
         return self.create(request)
 
     def get(self, request):
+        """Get list of all the issues from the database"""
         queryset = self.get_queryset()
         if request.user.role == Role.SENIOR:
             queryset = queryset.filter(Q(senior=request.user) | Q(senior=None))
@@ -77,6 +82,22 @@ class IssuesRetrieveUpdateDeleteAPI(generics.RetrieveUpdateDestroyAPIView):
     queryset = Issue.objects.all()
     permission_classes = [RolePermission]
     lookup_url_kwarg = "id"
+
+    def get(self, *args, **kwargs):
+        """Get an exact issue by its id from the database. ALL AUTHORIZED ROLES"""
+        return super().get(self, *args, **kwargs)
+
+    def put(self, *args, **kwargs):
+        """Update an issue completely. All fields must be provided.SENIORS and ADMINS only"""
+        return super().put(self, *args, **kwargs)
+
+    def patch(self, *args, **kwargs):
+        """Update an issue partially with provided fields. ALL AUTHORIZED ROLES"""
+        return super().patch(self, *args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        """Delete an issue by its id from the database. ADMINS only"""
+        return super().delete(self, *args, **kwargs)
 
 
 class MessageSerializer(serializers.ModelSerializer):
@@ -95,6 +116,16 @@ class MessageSerializer(serializers.ModelSerializer):
         return super().save()
 
 
+@swagger_auto_schema(
+    method="get",
+    operation_description="Get all messages for an issue with given id",
+    responses={200: MessageSerializer(many=True)},
+)
+@swagger_auto_schema(
+    method="post",
+    operation_description="create a message for an issue with given id",
+    request_body=MessageSerializer,
+)
 @api_view(["GET", "POST"])
 def messages_api_dispatcher(request: Request, issue_id):
     if request.method == "GET":
@@ -123,6 +154,7 @@ def messages_api_dispatcher(request: Request, issue_id):
 
 @api_view(["PUT"])
 def issues_close(request: Request, id: int):
+    """Setting the issue's stat to CLOSED. Only SENIOR"""
     issue = Issue.objects.get(id=id)
 
     if request.user.role != Role.SENIOR:
@@ -142,6 +174,7 @@ def issues_close(request: Request, id: int):
 
 @api_view(["PUT"])
 def issues_take(request: Request, id: int):
+    """Assinging an authorized Senior to an Issue and setting its stat to IN_PROGRESS"""
     issue = Issue.objects.get(id=id)
 
     if request.user.role != Role.SENIOR:

@@ -62,6 +62,7 @@ class UserListCreateAPI(generics.ListCreateAPIView):
         return User.objects.all()
 
     def post(self, request):
+        """Create a new user and send an activation link to its email"""
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -92,6 +93,7 @@ class UserListCreateAPI(generics.ListCreateAPIView):
         )
 
     def get(self, request):
+        """Get list of all the users"""
         queryset = self.get_queryset()
         serializer = UserSerializer(queryset, many=True)
 
@@ -110,6 +112,7 @@ def resend_activation_mail(request):  # -> Response:
 @api_view(["POST"])
 @permission_classes([permissions.AllowAny])
 def activate_user(request) -> Response:
+    """Activate a user by the activation key sent to his email"""
     serializer = UserActivationSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
 
@@ -163,16 +166,19 @@ class UserRetrieveDeleteAPI(generics.RetrieveUpdateDestroyAPIView):
         return User.objects.all()
 
     def get(self, request, *args, **kwargs):
+        """Retrieve an exact user by its id from the database. AUTHENTICATED USERS only"""
         instance = self.get_object()
         serializer = UserRegistrationPublicSerializer(instance)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def delete(self, request, *args, **kwargs):
+        """Delete a user by its id. ADMINS only"""
         instance = self.get_object()
         self.perform_destroy(instance)
         return Response(data="user deleted", status=status.HTTP_204_NO_CONTENT)
 
     def put(self, request, *args, **kwargs):
+        """Update a user completely. All fields must be provided. ADMINS only"""
         serializer = UserRegistrationPublicSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
