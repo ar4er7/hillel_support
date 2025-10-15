@@ -1,6 +1,6 @@
 from django.db import models
 
-# from shared.django import TimestampMixin
+# from shared.django import TimestampMixin #If you need timestamp field
 from users.models import User
 
 from .enums import Status
