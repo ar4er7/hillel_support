@@ -3,6 +3,7 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, permissions, serializers, status
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.request import Request
 from rest_framework.response import Response
 
@@ -72,6 +73,11 @@ class IssuesAPI(generics.ListCreateAPIView):
             queryset = queryset.filter(Q(senior=request.user) | Q(senior=None))
         elif request.user.role == Role.JUNIOR:
             queryset = queryset.filter(junior=request.user)
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -140,8 +146,11 @@ def messages_api_dispatcher(request: Request, issue_id):
                 )
             )
         ).order_by("-timestamp")
-        serializer = MessageSerializer(messages, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        paginator = LimitOffsetPagination()
+        # paginator.default_limit = 2#overrides_value_from_settings.PAGE_SIZE_if_needed
+        page = paginator.paginate_queryset(messages, request)
+        serializer = MessageSerializer(page, many=True)
+        return paginator.get_paginated_response(serializer.data)
     else:
         issue = Issue.objects.get(id=issue_id)
         payload = request.data | {"issue": issue.id}  # type: ignore
