@@ -1,5 +1,5 @@
 # About
-this is the educational project for Hillel IT
+this is the backend project for ticketing web platform
 
 The pipenv is used as a main package manager for the project. For more info please follow [documentation](https://pipenv.pypa.io/en/latest/)
 
