@@ -1,8 +1,17 @@
 [tool.black]
 line-length = 88
-target-version = ["py312"]  # или другая твоя версия
+target-version = ["py312"]
 
 [tool.isort]
 profile = "black"
 line_length = 88
-known_third_party = ["rest_framework", "django"]  # опционально
+known_third_party = ["rest_framework", "django"]
+skip = ['venv',]
+src_paths = ["."]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings"
+pythonpath = '..'
+python_files = ["test_*.py", "*_test.py", "testing/python/*.py"]
+python_functions = ["test_*", "*_test"]
+cache_dir = ".pytest_cache"

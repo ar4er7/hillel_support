@@ -2,9 +2,6 @@ from django.contrib import admin
 from django.urls import path
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
-from rest_framework import permissions
-from rest_framework_simplejwt.views import TokenObtainPairView
-
 from issues.api import (
     IssuesAPI,
     IssuesRetrieveUpdateDeleteAPI,
@@ -12,6 +9,8 @@ from issues.api import (
     issues_take,
     messages_api_dispatcher,
 )
+from rest_framework import permissions
+from rest_framework_simplejwt.views import TokenObtainPairView
 from users.api import (
     UserListCreateAPI,
     UserRetrieveDeleteAPI,

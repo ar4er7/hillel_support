@@ -6,7 +6,6 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.request import Request
 from rest_framework.response import Response
-
 from users.enums import Role
 
 from .enums import Status

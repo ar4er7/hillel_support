@@ -168,3 +168,6 @@ EMAIL_HOST = os.getenv("EMAIL_HOST", "mailing")
 EMAIL_PORT = os.getenv("EMAIL_PORT", 1025)
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "mailhog")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "mailhog")
+
+
+SWAGGER_USE_COMPAT_RENDERERS = False

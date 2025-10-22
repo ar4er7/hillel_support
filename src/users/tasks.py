@@ -1,8 +1,7 @@
 import uuid
 
-from django.core.mail import send_mail
-
 from config import celery_app
+from django.core.mail import send_mail
 
 
 @celery_app.task
