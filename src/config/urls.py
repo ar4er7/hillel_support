@@ -2,9 +2,6 @@ from django.contrib import admin
 from django.urls import path
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
-from rest_framework import permissions
-from rest_framework_simplejwt.views import TokenObtainPairView
-
 from issues.api import (
     IssuesAPI,
     IssuesRetrieveUpdateDeleteAPI,
@@ -12,6 +9,8 @@ from issues.api import (
     issues_take,
     messages_api_dispatcher,
 )
+from rest_framework import permissions
+from rest_framework_simplejwt.views import TokenObtainPairView
 from users.api import (
     UserListCreateAPI,
     UserRetrieveDeleteAPI,
@@ -21,12 +20,11 @@ from users.api import (
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="Snippets API",
+        title="Hillel Support API",
         default_version="v1",
-        description="Test description",
-        terms_of_service="https://www.google.com/policies/terms/",
-        contact=openapi.Contact(email="contact@snippets.local"),
-        license=openapi.License(name="BSD License"),
+        description="The backend API allows you to interact with the support ticketing system",
+        contact=openapi.Contact(email="support.support@gmail.com"),
+        license=openapi.License(name="MIT License"),
     ),
     public=True,
     permission_classes=(permissions.AllowAny,),

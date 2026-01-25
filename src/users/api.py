@@ -95,6 +95,10 @@ class UserListCreateAPI(generics.ListCreateAPIView):
     def get(self, request):
         """Get list of all the users"""
         queryset = self.get_queryset()
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
         serializer = UserSerializer(queryset, many=True)
 
         return Response(

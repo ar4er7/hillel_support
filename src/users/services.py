@@ -1,7 +1,6 @@
 import uuid
 
 from django.contrib.auth import get_user_model
-
 from shared.cache import CacheService
 
 from .models import ActivationKey

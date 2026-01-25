@@ -140,6 +140,8 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
+    "PAGE_SIZE": 2,
 }
 
 SIMPLE_JWT = {
@@ -166,3 +168,6 @@ EMAIL_HOST = os.getenv("EMAIL_HOST", "mailing")
 EMAIL_PORT = os.getenv("EMAIL_PORT", 1025)
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "mailhog")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "mailhog")
+
+
+SWAGGER_USE_COMPAT_RENDERERS = False
