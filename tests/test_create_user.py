@@ -29,12 +29,13 @@ def test_user_creation_success(client: Client):
     assert get_users_data["results"][0]["email"] == payload["email"]
 
 
-# @pytest.fixture
-# def john() -> str:
-#     return "John"
+@pytest.fixture
+def john() -> str:
+    return "John"
 
-# def test_username_injection(john):  # here we inject the fixruture's object
-#     assert john == "John"  # here we use it
+
+def test_username_injection(john):  # here we inject the fixruture's object
+    assert john == "John"  # here we use it
 
 
 # def strange_calculator(a, b):
